@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  role      Role      @default(USER)
+  createdAt DateTime  @default(now())
+  bookings  Booking[]
+}
+
+model Car {
+  id          Int       @id @default(autoincrement())
+  name        String
+  brand       String
+  pricePerDay Float
+  image       String
+  available   Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  bookings    Booking[]
+}
+
+model Booking {
+  id         Int           @id @default(autoincrement())
+  userId     Int
+  carId      Int
+  startDate  DateTime
+  endDate   DateTime
+  totalPrice Float
+  status    BookingStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  user      User          @relation(fields: [userId], references: [id])
+  car       Car           @relation(fields: [carId], references: [id])
+
+  @@index([carId])
+  @@index([userId])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
